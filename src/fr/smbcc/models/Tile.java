@@ -11,20 +11,22 @@ import java.awt.Rectangle;
  */
 public class Tile extends Sprite implements ActionListener{
 
-    public static enum tileType { WALL, HARDWALL, EMPTY, EXPLOSION };
-    public static int ITEM_CHANCES = 5;  // one in ITEM_CHANCES times
-    public static int W = 48;
-    public static int H = 48;
+    
+    public static int W = 48;            // tile width
+    public static int H = 48;            // tile height
     public static int SPRITE_SIZE = 48;
-    public static String spriteSheetPath = "C:\\Users\\IN-BR-012\\Documents\\adamingJEE\\code\\workspaces\\01_JAVASE\\SMBCC\\src\\fr\\smbcc\\resources\\tiles.png";
+    public static String spriteSheetPath = "tiles.png";   // sprite file name ; prefix added in Sprite.java
+    
+    public static enum tileType { WALL, HARDWALL, EMPTY, EXPLOSION };
     private tileType type;
+    private Item item;                          // WALL tiles can have items inside
+    public static int ITEM_CHANCES = 8;         // WALL tiles has item one in ITEM_CHANCES times
     private boolean hasItem;
-    private Item item;
-    private Bomb bomb;
-    private static int DELAY_EXPLOSION = 1000;  // time before explosion
-    private Timer explosion;
-    private boolean is_on_fire;
-    private boolean shouldBeRedrawn;
+    private Bomb bomb;                          // when a bom is dropped on tile
+    private Timer explosion;                    // explosion timer
+    private static int DELAY_EXPLOSION = 800;   // burning time after explosion
+    private boolean is_on_fire;                 // when deflagration reach tile
+    private boolean shouldBeRedrawn;            // when tile sprite has changed
 
 
     public Tile(int x, int y, tileType t) {
@@ -63,7 +65,8 @@ public class Tile extends Sprite implements ActionListener{
 
 
     /*
-    *  When player pick up item, end him back
+    *  When player pick up item, send him back. tile item will be removed after player 
+    *  ended interact with it (avoid ex nullPointer)
     */
     public Item pickItem(){
         this.hasItem = false;
@@ -75,7 +78,9 @@ public class Tile extends Sprite implements ActionListener{
         this.item = null;
     }
 
-    // explode tile
+    /*
+    *  Explode tile. 2 cases : tile bomb is explosing or a deflagration has reached this tile
+    */
     public void explode() {
 
         // first check if explosion is caused by another bomb
@@ -85,9 +90,10 @@ public class Tile extends Sprite implements ActionListener{
                 return;
             }
         }
-        this.explosion = new Timer(DELAY_EXPLOSION, this);
+        // ignite tile
+        this.explosion = new Timer(DELAY_EXPLOSION, this);  // explosion last for DELAY_EXPLOSION ms
         this.explosion.start();
-        if(this.hasItem && this.type == tileType.EMPTY){  // burn item if tile is not a wall
+        if(this.hasItem && this.type == tileType.EMPTY){    // burn item if tile is not a wall
             this.item = null;
             this.hasItem = false;
         }
@@ -97,6 +103,10 @@ public class Tile extends Sprite implements ActionListener{
         this.updateSprite();
     }
 
+
+    /*
+    *   Called after DELAY_EXPLOSION to end explosion
+    */
     @Override
     public void actionPerformed(ActionEvent e) {
         this.explosion.stop();
@@ -106,17 +116,20 @@ public class Tile extends Sprite implements ActionListener{
     }
 
 
-    public void updateSprite() { // set img corresponding to tile type
-        this.shouldBeRedrawn = true;
+    /*
+    *   Set tile sprite according to its type and its state
+    */
+    public void updateSprite() {
+        this.shouldBeRedrawn = true;    // tiles are redrawn only after a sprite change
         switch (this.type) {
             case EMPTY: 
-                if(this.hasItem) {  // display item
+                if(this.hasItem) {                  // empty tiles can have items
                     this.setVisible(true);
                     setSprite( this.item.getSprite() ) ;
-                } else if (this.bomb != null) {
+                } else if (this.bomb != null) {     //... or bombs
                     this.setVisible(true);
                     setSprite( this.bomb.getSprite() );
-                } else {  // do not display empty tiles
+                } else {                            //... or can be empty
                     setSprite(1 * SPRITE_SIZE, 0 * SPRITE_SIZE);
                 }
                 break;
@@ -157,9 +170,10 @@ public class Tile extends Sprite implements ActionListener{
     }
 
     public boolean setBomb( Bomb b ) {
+        // bomb can only be placed on empty tiles
         if(this.type == tileType.WALL || this.type == tileType.HARDWALL || this.bomb != null) return false;
         this.bomb = b;
-        if(this.hasItem){  // bomb replace item
+        if(this.hasItem){       // bomb replace item
             this.item = null;
             this.hasItem = false;
         }

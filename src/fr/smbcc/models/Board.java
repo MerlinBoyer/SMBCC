@@ -1,6 +1,9 @@
 package fr.smbcc.models;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
@@ -19,9 +22,11 @@ public class Board extends JPanel implements ActionListener {
     private Corgi corgi;
     private Cat   cat;
     private Map   map;
-    private int corgi_x = 48 * 15, corgi_y = 0;
+    private int corgi_x = 48 * 15 - 1, corgi_y = 0;
     private int cat_x= 0, cat_y = 48 * 14;
     private final int DELAY = 10;
+    private boolean game_over;
+    private String game_over_msg;
     
 
     public Board() {
@@ -31,6 +36,7 @@ public class Board extends JPanel implements ActionListener {
 
     private void initBoard() {
 
+        this.game_over = false;
         addKeyListener(new TAdapter());
         setBackground(Color.GREEN);
 	    setFocusable(true);
@@ -57,10 +63,37 @@ public class Board extends JPanel implements ActionListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        doDrawing(g);
+        if (!game_over) {
+
+            doDrawing(g);
+
+        } else {
+
+            doDrawing(g);
+            drawGameOver(g);
+            timer.stop();
+        }
         
         Toolkit.getDefaultToolkit().sync();
     }
+
+    private void drawGameOver(Graphics g) {
+        String msg = "Game Over : " + this.game_over_msg;
+        Font small = new Font("Helvetica", Font.BOLD, 50);
+        FontMetrics fm = getFontMetrics(small);
+
+        
+        int xx = (map.getWidth() - fm.stringWidth(msg)) / 2;
+        int yy = map.getHeight() / 2;
+        g.setColor(Color.black);
+        // g.drawRect(xx,yy - 45 ,fm.stringWidth(msg), 50);
+        g.fillRect(xx - 5,yy - 45 ,fm.stringWidth(msg) + 5, 60);
+
+        g.setColor(Color.red);
+        g.setFont(small);
+        g.drawString(msg, xx, yy);
+    }
+
     
     private void doDrawing(Graphics g) {
         
@@ -134,11 +167,11 @@ public class Board extends JPanel implements ActionListener {
 
     public void checkGameOver(){
         if (corgi.isDead()) {
-            System.out.println(" Cat has won :/");
-            timer.stop();
+            this.game_over_msg = " Cat has won :/";
+            this.game_over = true;
         } else if ( cat.isDead() ) {
-            System.out.println(" Corgi has won <3");
-            timer.stop();
+            this.game_over_msg = " Corgi has won <3";
+            this.game_over = true;
         }
     }
     
@@ -197,8 +230,4 @@ public class Board extends JPanel implements ActionListener {
 
 
 
-
-    /*
-    *   Access Map size
-    */
 }

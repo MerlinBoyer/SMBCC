@@ -5,7 +5,7 @@ import java.awt.event.KeyEvent;
 public class Corgi extends Player {
 
 
-    private final static String spriteSheetPath = "C:\\Users\\IN-BR-012\\Documents\\adamingJEE\\code\\workspaces\\01_JAVASE\\SMBCC\\src\\fr\\smbcc\\resources\\corgi_sprites.png";
+    private final static String spriteSheetPath = "corgi_sprites.png";
     private final static int corgiSpriteOffsetX = 0 * 3;  // (0 -> 3)
     private final static int corgiSpriteOffsetY = 1 * 4;  // (0 -> 1)
     protected static final int HITBOX_SIZE = 40;       // boundaries inside offset in px
@@ -31,18 +31,22 @@ public class Corgi extends Player {
 
         if (key == KeyEvent.VK_LEFT) {
             dx = -1 * (X_SPEED + bonus_speed);
+            dy = 0;
         }
 
         if (key == KeyEvent.VK_RIGHT) {
             dx = X_SPEED + bonus_speed;
+            dy = 0;
         }
 
         if (key == KeyEvent.VK_UP) {
             dy = -1 * (Y_SPEED + bonus_speed);
+            dx = 0;
         }
 
         if (key == KeyEvent.VK_DOWN) {
             dy = Y_SPEED + bonus_speed;
+            dx = 0;
         }
 
         if(key == 17 || key == 10) {

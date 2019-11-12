@@ -1,6 +1,7 @@
 package fr.smbcc.models;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import fr.smbcc.models.Tile.tileType;
 
@@ -19,14 +20,14 @@ public class Map {
         this.setHeight( Tile.H * nb_tiles_y );  // computes map width in pixels
         this.setWidth( Tile.W * nb_tiles_x );   // computes map height in pixels
 
-        tiles.add( this.generateEmptyRow(nb_tiles_x, 0) );  // first row is empty
-
-        for (int i = 1; i < nb_tiles_y - 2; i+=2) {        // map core is a grid of WALL / HARDWALL / EMPTY
-            tiles.add( this.generateRow(nb_tiles_x, i * Tile.H, 0) );
-            tiles.add( this.generateEmptyRow(nb_tiles_x, (i + 1) * Tile.H) );
+        Random r = new Random();
+        int map_type = r.nextInt(2);
+        if(map_type == 0) {
+            this.generateField1(); // create tiles according to specific pattern
+        } else if ( map_type == 1 ) {
+            this.generateField2(); // create tiles according to specific pattern
         }
-
-        tiles.add( this.generateFullRow(nb_tiles_x, (nb_tiles_y - 1)* Tile.H));  // last row is empty
+        
     }
 
 
@@ -36,10 +37,66 @@ public class Map {
     /*
     *  Generate tiles 
     */
+    private void generateField1(){
+        this.tiles = new ArrayList<ArrayList<Tile>>();
+        tiles.add( this.generateEmptyRow(nb_tiles_x, 0) );  // first row is empty
+
+        for (int i = 1; i < nb_tiles_y - 2; i++) {
+            if( i%2 == 1 ) {
+                tiles.add( this.generateRow(nb_tiles_x, i * Tile.H, 0) );
+            } else {
+                tiles.add( this.generateWallRow(nb_tiles_x, i * Tile.H) );
+            }
+        }
+        tiles.add( this.generateEmptyRow(nb_tiles_x, (nb_tiles_y - 2)* Tile.H));  // cat row is empty
+        tiles.add( this.generateFullRow(nb_tiles_x, (nb_tiles_y - 1)* Tile.H));  // last row is hard walled here
+    }
+
+    private void generateField2(){
+        this.tiles = new ArrayList<ArrayList<Tile>>();
+        tiles.add( this.generatePlayerRow(nb_tiles_x, 0) );  // first row is empty
+
+        for (int i = 1; i < nb_tiles_y - 2; i++) {
+            if( i%2 == 1 && i > 2 && i < nb_tiles_y - 4) {
+                tiles.add( this.generateRow(nb_tiles_x, i * Tile.H, 0) );
+            } else {
+                tiles.add( this.generateWallRow(nb_tiles_x, i * Tile.H) );
+            }
+        }
+        tiles.add( this.generatePlayerRow(nb_tiles_x, (nb_tiles_y - 2)* Tile.H));  // cat row is empty
+        tiles.add( this.generateFullRow(nb_tiles_x, (nb_tiles_y - 1)* Tile.H));  // last row is hard walled here
+    }
+
     private ArrayList< Tile > generateEmptyRow(int nb_tiles, int y_start) {
         ArrayList< Tile > arr = new ArrayList<>();
         for (int i = 0; i < nb_tiles_x; i++) {
             arr.add(new Tile(i * Tile.W, y_start, Tile.tileType.EMPTY ));
+        }
+        return arr;
+    }
+
+    private ArrayList< Tile > generatePlayerRow(int nb_tiles, int y_start) {
+        ArrayList< Tile > arr = new ArrayList<>();
+        for (int i = 0; i < nb_tiles_x; i++) {
+            if(i<3 || i>nb_tiles_x - 4) {
+                arr.add(new Tile(i * Tile.W, y_start, Tile.tileType.EMPTY ));
+            } else {
+                arr.add(new Tile(i * Tile.W, y_start, Tile.tileType.WALL ));
+            }
+        }
+        return arr;
+    }
+
+    private ArrayList< Tile > generateWallRow(int nb_tiles, int y_start) {
+        ArrayList< Tile > arr = new ArrayList<>();
+        Random r = new Random();
+        for (int i = 0; i < nb_tiles_x; i++) {
+            int is_wall = r.nextInt(6);
+            if( is_wall == 0) {
+                arr.add(new Tile(i * Tile.W, y_start, Tile.tileType.EMPTY ));
+            } else {
+                arr.add(new Tile(i * Tile.W, y_start, Tile.tileType.WALL ));
+            }
         }
         return arr;
     }
@@ -55,7 +112,7 @@ public class Map {
     private ArrayList< Tile > generateRow(int nb_tiles, int y_start, int parity) {
         ArrayList< Tile > arr = new ArrayList<>();
         for (int i = 0; i < nb_tiles_x; i++) {
-            Tile.tileType t = (i%2 == parity) ? Tile.tileType.WALL : Tile.tileType.HARDWALL;
+            Tile.tileType t = (i%2 == parity) ? Tile.tileType.HARDWALL : Tile.tileType.WALL;
             arr.add(new Tile(i * Tile.W, y_start, t ));
         }
         return arr;

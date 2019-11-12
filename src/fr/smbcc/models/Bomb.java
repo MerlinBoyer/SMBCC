@@ -18,8 +18,7 @@ public class Bomb extends Sprite implements ActionListener {
     private int range;
     private boolean has_exploded;
 
-    private static final String spriteSheetPath = "C:\\Users\\IN-BR-012\\Documents\\adamingJEE\\code\\workspaces\\01_JAVASE\\SMBCC\\src\\fr\\smbcc\\resources\\bombs.png";
-
+    private static final String spriteSheetPath = "bombs.png";
     public Bomb(int x, int y, int range) {
         super(x, y, spriteSheetPath);
         this.sprite_size = SPRITE_SIZE;

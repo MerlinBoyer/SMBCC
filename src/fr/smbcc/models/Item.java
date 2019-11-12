@@ -9,7 +9,7 @@ public class Item extends Sprite {
     public static int SPRITE_SIZE = 48;
     public static int BOMB_RANGE_UPGRADE = 1;
     public static int SPEED_UPGRADE = 1;
-    public static String spritePath = "C:\\Users\\IN-BR-012\\Documents\\adamingJEE\\code\\workspaces\\01_JAVASE\\SMBCC\\src\\fr\\smbcc\\resources\\items.png";
+    public static String spritePath = "items.png";
     Type type;
 
     public Item(Type t){

@@ -10,6 +10,9 @@ import javax.imageio.ImageIO;
  */
 public class Sprite {
 
+    // this prefix is used in vscode to get resources folder path
+    private static final String RESOURSES_PATH = "C:\\Users\\IN-BR-012\\Documents\\adamingJEE\\code\\workspaces\\01_JAVASE\\SMBCC\\resources\\";
+    
     protected int x;
     protected int y;
     protected int w = 48;
@@ -43,7 +46,7 @@ public class Sprite {
         BufferedImage image = null;
 
         try {
-            image = ImageIO.read(new File( this.spriteSheetPath ));
+            image = ImageIO.read(new File( RESOURSES_PATH + this.spriteSheetPath ));
         } catch (IOException e) {
             e.printStackTrace();
         }
