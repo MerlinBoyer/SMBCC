@@ -10,6 +10,10 @@ import fr.smbcc.models.Board;
 import fr.smbcc.models.Map;
 import fr.smbcc.models.Tile;
 
+
+/*
+*  Application is the entry point. Just creating a board and start threading.
+*/
 public class Application extends JFrame {
 
     public Application() {

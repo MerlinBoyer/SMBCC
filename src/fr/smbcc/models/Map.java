@@ -6,12 +6,14 @@ import java.util.Random;
 import fr.smbcc.models.Tile.tileType;
 
 /**
- * Map
+ * Map class is in charge of the field. it is composed by an array of tiles and have a method 
+ * to propagate esplosion on near tiles.
+ * There are different methods ( generateFieldXX() ) to generate a map.
  */
 public class Map {
 
-    private static int nb_tiles_x = 16;  // shoud be even nb
-    private static int nb_tiles_y = 16;  // shoud be even nb
+    private static int nb_tiles_x = 16;     // shoud be even nb
+    private static int nb_tiles_y = 16;     // shoud be even nb
     private int width;
     private int height;
     private ArrayList<ArrayList<Tile>> tiles = new ArrayList<ArrayList<Tile>>();
@@ -20,12 +22,12 @@ public class Map {
         this.setHeight( Tile.H * nb_tiles_y );  // computes map width in pixels
         this.setWidth( Tile.W * nb_tiles_x );   // computes map height in pixels
 
-        Random r = new Random();
+        Random r = new Random();                // used to choose a generation algorythm
         int map_type = r.nextInt(2);
         if(map_type == 0) {
-            this.generateField1(); // create tiles according to specific pattern
+            this.generateField1();              // create tiles according to specific pattern
         } else if ( map_type == 1 ) {
-            this.generateField2(); // create tiles according to specific pattern
+            this.generateField2();              // create tiles according to another specific pattern
         }
         
     }
@@ -34,8 +36,12 @@ public class Map {
 
 
 
-    /*
+    /*****************
     *  Generate tiles 
+    ******************/
+
+    /*
+    *  first way to generate a map
     */
     private void generateField1(){
         this.tiles = new ArrayList<ArrayList<Tile>>();
@@ -49,9 +55,13 @@ public class Map {
             }
         }
         tiles.add( this.generateEmptyRow(nb_tiles_x, (nb_tiles_y - 2)* Tile.H));  // cat row is empty
-        tiles.add( this.generateFullRow(nb_tiles_x, (nb_tiles_y - 1)* Tile.H));  // last row is hard walled here
+        tiles.add( this.generateFullRow(nb_tiles_x, (nb_tiles_y - 1)* Tile.H));   // last row is hard walled here
     }
 
+
+    /*
+    *  2nd way to generate a map  : 
+    */
     private void generateField2(){
         this.tiles = new ArrayList<ArrayList<Tile>>();
         tiles.add( this.generatePlayerRow(nb_tiles_x, 0) );  // first row is empty
@@ -64,9 +74,13 @@ public class Map {
             }
         }
         tiles.add( this.generatePlayerRow(nb_tiles_x, (nb_tiles_y - 2)* Tile.H));  // cat row is empty
-        tiles.add( this.generateFullRow(nb_tiles_x, (nb_tiles_y - 1)* Tile.H));  // last row is hard walled here
+        tiles.add( this.generateFullRow(nb_tiles_x, (nb_tiles_y - 1)* Tile.H));    // last row is hard walled here
     }
 
+
+    /*
+    *  generate a row filled with EMPTY tiles only
+    */
     private ArrayList< Tile > generateEmptyRow(int nb_tiles, int y_start) {
         ArrayList< Tile > arr = new ArrayList<>();
         for (int i = 0; i < nb_tiles_x; i++) {
@@ -75,6 +89,10 @@ public class Map {
         return arr;
     }
 
+
+    /*
+    *  generate a row with WALL tiles int the middle and first and last 3 tiles EMPTY (to place a player on it)
+    */
     private ArrayList< Tile > generatePlayerRow(int nb_tiles, int y_start) {
         ArrayList< Tile > arr = new ArrayList<>();
         for (int i = 0; i < nb_tiles_x; i++) {
@@ -87,6 +105,10 @@ public class Map {
         return arr;
     }
 
+
+    /*
+    *  generate a row alterating HARDWALL and WALL tiles
+    */
     private ArrayList< Tile > generateWallRow(int nb_tiles, int y_start) {
         ArrayList< Tile > arr = new ArrayList<>();
         Random r = new Random();
@@ -101,6 +123,9 @@ public class Map {
         return arr;
     }
 
+    /*
+    *  generate a row composed by HARDWALL tiles only
+    */
     private ArrayList< Tile > generateFullRow(int nb_tiles, int y_start) {
         ArrayList< Tile > arr = new ArrayList<>();
         for (int i = 0; i < nb_tiles_x; i++) {
@@ -109,6 +134,9 @@ public class Map {
         return arr;
     }
 
+    /*
+    *  same as generateWallRow but with a parity parameter
+    */
     private ArrayList< Tile > generateRow(int nb_tiles, int y_start, int parity) {
         ArrayList< Tile > arr = new ArrayList<>();
         for (int i = 0; i < nb_tiles_x; i++) {
@@ -124,7 +152,9 @@ public class Map {
     *  handle game events
     */
 
-    // link a bomb & its tile
+    /*
+    *   link a bomb & its tile
+    */
     public boolean associateBombeAndTile(Bomb b) {
         System.out.println("associate bomb & tile");
         // get corresponding tile according to bomb coors
@@ -132,7 +162,7 @@ public class Map {
         int row = b.getY() / Tile.H;
 
         Tile t = this.tiles.get( row ).get( col );
-        boolean bombplaced = t.setBomb(b);
+        boolean bombplaced = t.setBomb(b);      // if return false : bomb cannot be placed on this tile
 
         if( !bombplaced ) return false;
 
@@ -150,8 +180,7 @@ public class Map {
         int row = central_tile.getY() / Tile.H;
         central_tile.explode();
 
-
-        // // propagation on right side
+        // propagation on right side
         for (int i = col + 1; i < col + range + 1 && i < nb_tiles_x ; i++) {
             if ( this.tiles.get( row ).get( i ).getType() == tileType.HARDWALL ) break; 
             this.tiles.get( row ).get( i ).explode();

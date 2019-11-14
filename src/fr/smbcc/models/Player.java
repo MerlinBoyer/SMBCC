@@ -7,10 +7,17 @@ import java.awt.Rectangle;
 
 import javax.swing.Timer;
 
+
+/*
+*   Player class regroup standard player actions :
+*      moving
+*      environnement interactions 
+*      graphic animations
+*/
 public class Player extends Sprite implements ActionListener {
 
     // graphic var
-    protected Timer timerAnim;                          // called to update animation on movement
+    protected Timer timerAnim;                          // called to update animation when moving
     protected static final int DELAY_ANIMATION = 100;   // delay (ms) between movement animations
     protected static final int NB_SPRITE_ANIM = 3;      // nb sprites available to animate 
     protected int spriteOffsetX = 0;                    // sprite set offset on the spritesheet
@@ -21,7 +28,7 @@ public class Player extends Sprite implements ActionListener {
     protected final int Y_SPEED = 3;
     protected static final int SPRITE_SIZE = 48;        // 1 sprite size (in px)
     protected int current_sprite_animation;             // current animation sprite displayed
-    protected int current_sprite_movement;              // current movement sprite displayed
+    protected int current_sprite_movement;              // current movement sprite displayed (right, left, up or down)
 
     // game var
     protected int hitbox_offset_x, hitbox_offset_y, hitbox_w, hitbox_h;
@@ -42,18 +49,18 @@ public class Player extends Sprite implements ActionListener {
 
         setSprite(offx * SPRITE_SIZE, offy * SPRITE_SIZE); // offx & offy allow to select sprites set in spritesheet
 
-        initAnimation();  // add timer on animation
+        initAnimation();  // add animation timer 
 
     }
 
 
-    /*
+    /*******************
     *  initialization
-    */
+    ********************/
 
     public void initGraphics() {
         this.sprite_size = SPRITE_SIZE;     
-        this.current_sprite_animation = 0;  // save current sprite displadqdyded
+        this.current_sprite_animation = 0;    // save current sprite displayed
         this.current_sprite_movement = 0;
     }
 
@@ -64,8 +71,26 @@ public class Player extends Sprite implements ActionListener {
         this.max_bomb = 2;
     }
 
+    // specific timer for animation update
+    public void initAnimation() {
+        timerAnim = new Timer(DELAY_ANIMATION, this);
+        timerAnim.start();
+    }
+
+    /*
+    *  called on animation timer interruption
+    */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        this.updateAnimation();
+    }
 
 
+
+
+    /**********************
+    *   Player actions
+    **********************/
 
     /*
      * update position / appearance
@@ -80,33 +105,20 @@ public class Player extends Sprite implements ActionListener {
         this.updateSprite();
     }
 
-    // specific timer for animation update
-    public void initAnimation() {
-        timerAnim = new Timer(DELAY_ANIMATION, this);
-        timerAnim.start();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        this.updateAnimation();
-    }
-
-
-
     /*
-    *   Player actions
+    *  update player position, interact with his current tile and check collision with envirronement
     */
-
-    // change sprite coor
     public void move(Map map) {
 
         int col = this.getXPos() / Tile.W;
         int row = this.getYPos() / Tile.H;
         
+        // add dx and dy to move player to next position
         x += dx;
         y += dy;
 
         // first check if player is out of map
+        // if player is out : substract dx and dy and cancel movement
         if( this.x < 0 || this.x + this.getWidth() >= map.getWidth() 
             || y < 0 || y + this.getHeight() > map.getHeight() ){
                 x -= dx;
@@ -118,12 +130,17 @@ public class Player extends Sprite implements ActionListener {
         this.walkOnTile( map.getTile( row,col ) );
 
         // check player neighboorhood (collisions)
+        // if player coor intersect unwalkable tiles : cancel movement
         if( !this.checkNextTiles(map, row, col) ) {
             x -= dx;
             y -= dy;
         }
     }
 
+
+    /*
+    *  apply effects depending on tile status
+    */
     public void walkOnTile(Tile t) {
         if (t==null) return;
         switch(t.getType()){
@@ -144,6 +161,9 @@ public class Player extends Sprite implements ActionListener {
         }
     }
 
+    /*
+    *   check if player can walk on tiles in his direction
+    */
     public boolean checkNextTiles(Map map, int row, int col) {
         if(dx > 0) {
             if( !this.canWalkOnTile( map.getTile(row, col + 1) ) ) return false;
@@ -160,6 +180,10 @@ public class Player extends Sprite implements ActionListener {
         return true;
     }
 
+
+    /*
+    *  check if player intersect unwalkable tile hitbox
+    */
     public boolean canWalkOnTile(Tile t) {
         if (t==null) return true;
 
@@ -174,7 +198,7 @@ public class Player extends Sprite implements ActionListener {
                 return false;
             
             case EMPTY:
-                if(t.getBomb() == null) {
+                if(t.getBomb() == null) {    // cannot walk on a tile with a bomb
                     return true;
                 } else {
                     return false;
@@ -185,6 +209,9 @@ public class Player extends Sprite implements ActionListener {
         }
     }
 
+    /*
+    *  modify player carac according to power-up arg
+    */
     public void addItem(Item item) {
         switch (item.getType()) {
             case BOMB_RANGE:
@@ -207,6 +234,10 @@ public class Player extends Sprite implements ActionListener {
         }
     }
 
+
+    /*
+    *   add a new bomb if allowed. bomb will be associate with a tile by Map
+    */
     public void placeBomb(){
         if ( this.getNbBombs() < this.max_bomb ) {
             this.bombs.add( new Bomb( this.getXPos(), this.getYPos(), this.getBombRange() ));
@@ -218,36 +249,30 @@ public class Player extends Sprite implements ActionListener {
 
 
 
-    /*
-    *   Updates visual
-    */
+    /********************
+    *   visual updates
+    ********************/
 
     // change animation current sprite
     public void updateAnimation() {  // update sprite to animate
         if ( this.dx != 0 || this.dy != 0) {  // animate only when moving
-            // System.out.println("UPDATE ANIMATION");
             this.current_sprite_animation = this.current_sprite_animation < NB_SPRITE_ANIM -1 ? this.current_sprite_animation+1 : 0;
         }
     }
 
     // change movement sprite (up, down, right, left)
-    public void updateMovement() {  // change sprite direction
+    public void updateMovement() {      // change sprite direction
 
-        if (this.dy > 0 ) {  // up
-            // System.out.println("go up");
+        if (this.dy > 0 ) {                 // up
             this.current_sprite_movement = 0;
-        } else if ( this.dy < 0 ) {  // down
-            // System.out.println("go down");
+        } else if ( this.dy < 0 ) {         // down
             this.current_sprite_movement = 3;
-        } else if ( this.dx > 0 ) {  // right
-            // System.out.println("go right");
+        } else if ( this.dx > 0 ) {         // right
             this.current_sprite_movement = 2;
-        } else if ( this.dx < 0 ) {  // left
-            // System.out.println("go left");
+        } else if ( this.dx < 0 ) {         // left
             this.current_sprite_movement = 1;
         }
     }
-
 
     // change buffered img sprite
     public void updateSprite() {
@@ -258,9 +283,9 @@ public class Player extends Sprite implements ActionListener {
 
 
 
-    /*
+    /**********************
     *  getters & setters 
-    */
+    ***********************/
     
     public int getWidth() {
         return w;
@@ -282,11 +307,12 @@ public class Player extends Sprite implements ActionListener {
         return this.bomb_range;
     }
 
-    // baryceneter of player
+    // barycenter x
     public int getXPos(){
         return this.x + SPRITE_SIZE / 2;
     }
 
+    // barycenter y
     public int getYPos(){
         return this.y + SPRITE_SIZE / 2;
     }

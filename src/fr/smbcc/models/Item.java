@@ -1,16 +1,19 @@
 package fr.smbcc.models;
 
 /**
- * Item
+ * Items are player power-up randomly stored in wall tiles
  */
 public class Item extends Sprite {
 
-    public static enum Type { SPEED, BOMB_RANGE, BOMB_NB };
-    public static int SPRITE_SIZE = 48;
-    public static int BOMB_RANGE_UPGRADE = 1;
-    public static int SPEED_UPGRADE = 1;
-    public static String spritePath = "items.png";
+    public static enum Type { SPEED, BOMB_RANGE, BOMB_NB };    // there a 3 types of power-p :
+                                                               //     - SPEED : increase player speed
+                                                               //     - BOMB_RANGE : increase explosion size
+                                                               //     - BOMB_NB : increase max bomb player can place in the same time
     Type type;
+    public static int SPRITE_SIZE = 48;
+    public static int BOMB_RANGE_UPGRADE = 1;           // bomb range added to player
+    public static int SPEED_UPGRADE = 1;                // speed added to player
+    public static String spritePath = "items.png";      // 
 
     public Item(Type t){
         super(0,0,spritePath);
@@ -19,6 +22,10 @@ public class Item extends Sprite {
         this.updateSprite();
     }
 
+
+    /*
+    *   pick sprite in sprite sheet according to item type
+    */
     public void updateSprite(){
         switch (this.type) {
             case SPEED:

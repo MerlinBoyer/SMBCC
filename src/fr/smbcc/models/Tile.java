@@ -7,13 +7,18 @@ import java.awt.event.ActionListener;
 import java.awt.Rectangle;
 
 /**
- * Tile
+ * Tile class implements a game tile. 
+ *   An HARDWALL tile is not walkable and cannot be destroyed
+ *   a WALL is not walkable and can hide an item. if a wall is burned by an explosion,
+ *      tile become empty and item is revealed.
+ *   an EMPTY tile is walkable and can have an pickable item.
+ *   an EXPLOSION tile is a state of transition and is walkable but kill player.
  */
 public class Tile extends Sprite implements ActionListener{
 
     
-    public static int W = 48;            // tile width
-    public static int H = 48;            // tile height
+    public static int W = 48;                   // tile width
+    public static int H = 48;                   // tile height
     public static int SPRITE_SIZE = 48;
     public static String spriteSheetPath = "tiles.png";   // sprite file name ; prefix added in Sprite.java
     
@@ -21,7 +26,7 @@ public class Tile extends Sprite implements ActionListener{
     private tileType type;
     private Item item;                          // WALL tiles can have items inside
     public static int ITEM_CHANCES = 8;         // WALL tiles has item one in ITEM_CHANCES times
-    private boolean hasItem;
+    private boolean hasItem;                    // indicate if tile has an item
     private Bomb bomb;                          // when a bom is dropped on tile
     private Timer explosion;                    // explosion timer
     private static int DELAY_EXPLOSION = 800;   // burning time after explosion

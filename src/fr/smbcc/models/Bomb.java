@@ -6,26 +6,26 @@ import java.awt.event.ActionListener;
 import javax.swing.Timer;
 
 /**
- * Bomb
+ * Bomb class is mainly composed by a timer triggering explosion
  */
 public class Bomb extends Sprite implements ActionListener {
 
+    private Timer ttl;                     // bomb time to live timer
     private static int DELAY_BOMB = 3000;  // time before explosion
-    private static int SPRITE_SIZE = 48;  // time before explosion
-    private Timer ttl;
-    private Tile tile;
-    private int x, y;
-    private int range;
-    private boolean has_exploded;
+    private static int SPRITE_SIZE = 48;   // bomb sprite size
+    private Tile tile;                     // bomb is placed on a specific tile
+    private int range;                     // range is tile number to burn in each direction
+    private boolean has_exploded;          // indication for Map that bomb has exploded and explosion must be generated 
 
     private static final String spriteSheetPath = "bombs.png";
+
     public Bomb(int x, int y, int range) {
         super(x, y, spriteSheetPath);
-        this.sprite_size = SPRITE_SIZE;
-        this.ttl = new Timer(DELAY_BOMB, this);
         this.has_exploded = false;
+        this.ttl = new Timer(DELAY_BOMB, this);
         this.range = range;
-        this.setSprite(0, 0);  // only one bomb sprite
+        this.sprite_size = SPRITE_SIZE;
+        this.setSprite(0, 0);                       // only one bomb sprite
     }
 
 
@@ -37,11 +37,18 @@ public class Bomb extends Sprite implements ActionListener {
         this.ttl.start();
     }
 
+    /*
+    *  timer end
+    */
     @Override
     public void actionPerformed(ActionEvent e) {
         this.explode();
     }
 
+
+    /*
+    *  bomb explosion can be triggered by another explosion burning its tile
+    */
     public void explode(){
         System.out.println("bomb EXPLOSION");
         this.has_exploded = true;
